@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "metis-fastapi"
+version = "0.1.0"
+description = ""
+authors = ["Shinsuke OTA <ota@rcnp.s.u-tokyo.ac.jp>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+redis = "^5.0.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
