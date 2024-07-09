@@ -36,6 +36,14 @@ async def read_item(key: str) :
         val = ""
     return {"message": val}
 
+@app.get("/publish/{chnl}/{msg}")
+async def read_item(chnl: str, msg: str) :
+    r = aProxy.instance()
+    val = r.publish(chnl,msg);
+    if val == None :
+        val = ""
+    return {"message": val}
+
 @app.get("/items/")
 async def read_item(skip: int = 0, limit: int = 10):
     return JSONResponse(content={"skip":skip, "limit":limit})
