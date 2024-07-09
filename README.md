@@ -1,6 +1,5 @@
 # metis_fastapi
 
-<<<<<<< Updated upstream
 ## Project setup
 ```
 poetry install
@@ -18,7 +17,6 @@ Run with some options may be convenient.
 poetry build
 ```
 
-=======
 The metis_fastapi serves the api for the slow control.
 
 ## Requirement
@@ -36,4 +34,4 @@ poetry run  uvicorn metis_fastapi.main:app --reload --host 0.0.0.0 --port 8000
 
 Then you can access http://localhost:8000 from browsers.
 For api document, please access http://localhost:8000/docs
->>>>>>> Stashed changes
+
