@@ -14,6 +14,9 @@ async def root() :
 @router.get('/read/{ip}/')
 async def read_scaler(
     ip: str):
+    if (ip == "10.32.2.169") : 
+        # HR-TDC
+        
     if (ip == "192.168.10.1") :
         scr = []
         for i in range(64):
