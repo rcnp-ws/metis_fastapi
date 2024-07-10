@@ -1,6 +1,7 @@
 import re
 import subprocess
 import time
+
 import numpy as np
 from BaseScaler import BaseScaler
 
@@ -47,12 +48,12 @@ class HulScaler(BaseScaler):
         self._info["address"] = ip
         self.getVersion(ip)
 
-    def loopGetData(self, nLoop):
+    def loopGetData(self, nLoop=0):
         iLoop = 0
         lastModified = 0
         period = 1  # second
         checkStep = 0.1
-        while ((iLoop < nLoop) if nLoop > 0 else 1):
+        while (iLoop < nLoop) if nLoop > 0 else 1:
             if time.time() - lastModified < period:
                 time.sleep(checkStep)
                 continue
@@ -90,7 +91,7 @@ class HulScaler(BaseScaler):
             for line in lines:
                 if (not len(line)) or line[0] == "*" or line[0] == "#":
                     continue
-                values.append(line)
+                values.append(int(line))
             hbfn = values.pop(-1)
             timestamp = time.time()
             if len(values) == self._info["numCh"]:
@@ -106,15 +107,22 @@ class HulScaler(BaseScaler):
                 lastHbfn = self._lastData[sid]["hbfn"]
                 lastUpdate = self._lastData[sid]["ts"]
                 for i, val in enumerate(lastValues):
-                    diffValues[i] = int(values[i]) - int(val)
-                    diffValues[i] += 2**int(self._info["numBit"]
-                                            ) if diffValues[i] < 0 else 0
-                diffHbfn = int(hbfn) - int(lastHbfn)
+                    diffValues[i] = values[i] - val
+                    diffValues[i] += (
+                        2 ** self._info["numBit"] if diffValues[i] < 0 else 0
+                    )
+                diffHbfn = hbfn - lastHbfn
                 diffHbfn += (2**24) if diffHbfn < 0 else 0
 
                 diffTs = float(timestamp) - float(lastUpdate)
-            self._data[sid] = {"data": values, "hbfn": hbfn, "ts": timestamp,
-                               "diff": diffValues, "diffHbfn": diffHbfn, "diffTs": diffTs}
+            self._data[sid] = {
+                "data": values,
+                "hbfn": hbfn,
+                "ts": timestamp,
+                "diff": diffValues,
+                "diffHbfn": diffHbfn,
+                "diffTs": diffTs,
+            }
         print(self._data)
 
     def getVersion(self, ip):
@@ -128,7 +136,7 @@ class HulScaler(BaseScaler):
             .decode("utf-8")
             .split("\n")
         )
-#        print(lines)
+        #        print(lines)
         for line in lines:
             if (not len(line)) or line[0] == "*" or line[0] == "#":
                 continue
