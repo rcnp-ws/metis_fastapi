@@ -3,7 +3,7 @@ import subprocess
 import time
 
 import numpy as np
-from BaseScaler import BaseScaler
+from modules.BaseScaler import BaseScaler
 
 
 class HulScaler(BaseScaler):
@@ -45,8 +45,21 @@ class HulScaler(BaseScaler):
                 ]
             ],
         }
-        self._info["address"] = ip
+        self._address = ip
+        self._type = ""
         self.getVersion(ip)
+        self._done = False
+
+    def stop(self):
+        self._done = True
+
+    def isValid(self):
+        isValid = True
+        print(self._info)
+        for info in self._info.values():
+            print(info["isValid"])
+            isValid *= info["isValid"]
+        return isValid
 
     def loopGetData(self, nLoop=0):
         iLoop = 0
@@ -60,20 +73,22 @@ class HulScaler(BaseScaler):
             iLoop += 1
             lastModified = time.time()
             self.getData()
+            if self._done:
+                break
 
     def getData(self):
-        print(self._info["fwid"])
-        print(self._dataCmd[self._info["fwid"]])
+        print(self._type)
+        print(self._dataCmd[self._type])
         print(self._data)
         self._lastData = self._data
-        for idx, fmts in enumerate(self._dataCmd[self._info["fwid"]]):
+        for idx, fmts in enumerate(self._dataCmd[self._type]):
             cmd = []
-            sid = "{}-{}".format(self._info["address"], idx)
+            sid = "{}-{}".format(self._address, idx)
             for fmt in fmts:
                 cmd.append(
                     fmt.format(
-                        ".scaler.{}-{}.txt".format(self._info["address"], idx),
-                        self._info["address"],
+                        ".scaler.{}-{}.txt".format(self._address, idx),
+                        self._address,
                     )
                 )
             cmd = " && ".join(
@@ -94,12 +109,12 @@ class HulScaler(BaseScaler):
                 values.append(int(line))
             hbfn = values.pop(-1)
             timestamp = time.time()
-            if len(values) == self._info["numCh"]:
+            if len(values) == self._info[sid]["numCh"]:
                 print("good")
             else:
                 print("bad")
 
-            diffValues = [np.nan] * self._info["numCh"]
+            diffValues = [np.nan] * self._info[sid]["numCh"]
             diffHbfn = 0
             diffTs = 0
             if len(self._lastData) > 0 and sid in self._lastData:
@@ -109,7 +124,7 @@ class HulScaler(BaseScaler):
                 for i, val in enumerate(lastValues):
                     diffValues[i] = values[i] - val
                     diffValues[i] += (
-                        2 ** self._info["numBit"] if diffValues[i] < 0 else 0
+                        2 ** self._info[sid]["numBit"] if diffValues[i] < 0 else 0
                     )
                 diffHbfn = hbfn - lastHbfn
                 diffHbfn += (2**24) if diffHbfn < 0 else 0
@@ -137,25 +152,35 @@ class HulScaler(BaseScaler):
             .split("\n")
         )
         #        print(lines)
+        info = {'address': self._address}
         for line in lines:
             if (not len(line)) or line[0] == "*" or line[0] == "#":
                 continue
             result = re.match(r"FW ID +: (\S+)", line)
             if result:
-                self._info["fwid"] = result.group(1)
-                if self._info["fwid"] in self._types:
-                    self._info["type"] = self._types[self._info["fwid"]]["name"]
-                    self._info["numCh"] = self._types[self._info["fwid"]]["numCh"]
-                    self._info["numBit"] = self._types[self._info["fwid"]]["numBit"]
-                    self._info["isValid"] = True
-                else:
-                    self._info["type"] = "unknown"
-                    self._info["isValid"] = False
+                info["fwid"] = result.group(1)
+                self._type = info["fwid"]
                 continue
             result = re.match(r"FW version +: (\S+)", line)
             if result:
-                self._info["fwver"] = result.group(1)
+                info["fwver"] = result.group(1)
                 continue
+
+        if info["fwid"] in self._types:
+            info["type"] = self._types[info["fwid"]]["name"]
+            info["numCh"] = self._types[info["fwid"]]["numCh"]
+            info["numBit"] = self._types[info["fwid"]]["numBit"]
+            info["isValid"] = True
+        else:
+            info["type"] = "unknown"
+            info["isValid"] = False
+        if self._type not in self._dataCmd:
+            sid = "{}-{}".format(info["address"], 0)
+            self._info[sid] = info
+            return
+        for idx, fmt in enumerate(self._dataCmd[self._type]):
+            sid = "{}-{}".format(info["address"], idx)
+            self._info[sid] = info
 
 
 def main():
@@ -169,6 +194,7 @@ def main():
     scaler = HulScaler(ip)
     print(scaler._info)
     scaler.loopGetData(2)
+    print(scaler.getDataJson())
 
 
 if __name__ == "__main__":

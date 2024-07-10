@@ -4,9 +4,8 @@ import subprocess
 import threading
 import time
 
-import BaseScaler
-from BaseEventTask import BaseEventTask
-from HulScaler import HulScaler
+from modules.BaseEventTask import BaseEventTask
+from modules.HulScaler import HulScaler
 
 isDone = False
 sendBuffer = {}
@@ -26,6 +25,19 @@ class HulScalerTask(BaseEventTask):
         super().__init__()
         self._isDone = False
         self._scaler = HulScaler(ip)
+
+    def isValid(self):
+        print("HulScalerTask::isValid")
+        return self._scaler.isValid()
+
+    def getInfo(self):
+        return self._scaler._info
+
+    def getData(self):
+        return self._scaler._data
+
+    def stop(self):
+        self._scaler.stop()
 
     def task(self):
         self._scaler.loopGetData()

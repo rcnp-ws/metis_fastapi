@@ -3,10 +3,12 @@ import datetime
 import redis
 from fastapi import APIRouter, Path
 from modules.ScalerFactory import ScalerFactory
+from modules.HulScaler import HulScaler
 
 router = APIRouter(prefix="/scaler", tags=["scaler"])
 
-factory = ScalerFactory
+factory = ScalerFactory()
+HulScaler.CommandPath = "ssh ata03 "
 
 
 @router.get("/")
@@ -14,10 +16,15 @@ async def root():
     pass
 
 
-@router.get("/add/{id}/{series}")
-async def scaler_add(id: str, series: str):
-    factory.add(id, series)
-    return factory.get_info(id)
+@router.get("/add/hul/{id}/")
+async def scaler_add(id: str):
+    return factory.addHulScaler(id)
+
+
+@router.get("/remove/{id}")
+async def scaler_remove(id: str):
+    factory.removeScaler(id)
+    return factory.get_info()
 
 
 @router.get("/read/info/all/")
@@ -25,9 +32,19 @@ async def scaler_read_info_all():
     return factory.get_info()
 
 
+@router.get("/read/info/{id}/")
+async def scaler_read_info_id(id: str):
+    return factory.get_info(id)
+
+
 @router.get("/read/data/all")
 async def scaler_read_data_all():
     return factory.get_data()
+
+
+@router.get("/read/data/{id}/")
+async def scaler_read_data_id(id: str):
+    return factory.get_data(id)
 
 
 @router.get("/read/{ip}/")
