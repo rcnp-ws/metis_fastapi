@@ -1,6 +1,7 @@
 import re
 import subprocess
-
+import time
+import numpy as np
 from BaseScaler import BaseScaler
 
 
@@ -13,7 +14,7 @@ class HulScaler(BaseScaler):
         self._types = {
             "0xc480": {"name": "StrHrTdc Base", "numCh": 32, "numBit": [32] * 32},
             "0x60c4": {"name": "StrLrTdc", "numCh": 129, "numBit": [32] * 129},
-            "0xf000": {"name": "Mikumari", "numCh": 40, "numBit": [32] * 40},
+            "0xf000": {"name": "Mikumari", "numCh": 66, "numBit": [32] * 66},
         }
         self._dataCmd = {
             "0xc480": [
@@ -28,15 +29,42 @@ class HulScaler(BaseScaler):
                     "od -An -j4 -N4 -v -t u4 -w4 {0}",
                 ],
             ],
-            "0x60c4": [],
-            "0xf000": [],
+            "0x60c4": [
+                [
+                    "read_scr {1} {0} ",
+                    "od -An -j40 -v -t u4 -w4 {0}",
+                    "od -An -j4 -N4 -v -t u4 -w4 {0}",
+                ],
+            ],
+            "0xf000": [
+                [
+                    "read_scr {1} {0} ",
+                    "od -An -j40 -v -t u4 -w4 {0}",
+                    "od -An -j4 -N4 -v -t u4 -w4 {0}",
+                ]
+            ],
         }
         self._info["address"] = ip
         self.getVersion(ip)
 
+    def loopGetData(self, nLoop):
+        iLoop = 0
+        lastModified = 0
+        period = 1  # second
+        checkStep = 0.1
+        while ((iLoop < nLoop) if nLoop > 0 else 1):
+            if time.time() - lastModified < period:
+                time.sleep(checkStep)
+                continue
+            iLoop += 1
+            lastModified = time.time()
+            self.getData()
+
     def getData(self):
         print(self._info["fwid"])
         print(self._dataCmd[self._info["fwid"]])
+        print(self._data)
+        self._lastData = self._data
         for idx, fmts in enumerate(self._dataCmd[self._info["fwid"]]):
             cmd = []
             sid = "{}-{}".format(self._info["address"], idx)
@@ -63,8 +91,30 @@ class HulScaler(BaseScaler):
                 if (not len(line)) or line[0] == "*" or line[0] == "#":
                     continue
                 values.append(line)
-            timestamp = values.pop(-1)
-            self._data[sid] = {"data": values, "ts": timestamp}
+            hbfn = values.pop(-1)
+            timestamp = time.time()
+            if len(values) == self._info["numCh"]:
+                print("good")
+            else:
+                print("bad")
+
+            diffValues = [np.nan] * self._info["numCh"]
+            diffHbfn = 0
+            diffTs = 0
+            if len(self._lastData) > 0 and sid in self._lastData:
+                lastValues = self._lastData[sid]["data"]
+                lastHbfn = self._lastData[sid]["hbfn"]
+                lastUpdate = self._lastData[sid]["ts"]
+                for i, val in enumerate(lastValues):
+                    diffValues[i] = int(values[i]) - int(val)
+                    diffValues[i] += 2**int(self._info["numBit"]
+                                            ) if diffValues[i] < 0 else 0
+                diffHbfn = int(hbfn) - int(lastHbfn)
+                diffHbfn += (2**24) if diffHbfn < 0 else 0
+
+                diffTs = float(timestamp) - float(lastUpdate)
+            self._data[sid] = {"data": values, "hbfn": hbfn, "ts": timestamp,
+                               "diff": diffValues, "diffHbfn": diffHbfn, "diffTs": diffTs}
         print(self._data)
 
     def getVersion(self, ip):
@@ -78,7 +128,7 @@ class HulScaler(BaseScaler):
             .decode("utf-8")
             .split("\n")
         )
-        print(lines)
+#        print(lines)
         for line in lines:
             if (not len(line)) or line[0] == "*" or line[0] == "#":
                 continue
@@ -110,7 +160,7 @@ def main():
     HulScaler.CommandPath = "ssh ata03 "
     scaler = HulScaler(ip)
     print(scaler._info)
-    scaler.getData()
+    scaler.loopGetData(2)
 
 
 if __name__ == "__main__":

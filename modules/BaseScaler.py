@@ -5,6 +5,7 @@ class BaseScaler:
 
     def __init__(self) -> None:
         self._data = {}
+        self._lastData = {}
         self._info = {
             "numCh": 0,
             "numBit": 0,
