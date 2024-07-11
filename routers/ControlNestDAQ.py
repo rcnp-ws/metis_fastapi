@@ -12,8 +12,8 @@ async def root() :
 
 @router.get('/status/')
 async def read_status():
-   #rcli = redis.Redis("vmeserver1-gp")
-   rcli = redis.Redis("localhost")
+   rcli = redis.Redis("vmeserver1-gp")
+   #rcli = redis.Redis("localhost")
    key_updated = rcli.keys("daq_service:*:updatedTime")
    val_updated = rcli.mget(key_updated)
    key_state = rcli.keys("daq_service:*:fair-mq-state")
@@ -25,14 +25,14 @@ async def read_status():
 
 @router.get('/run_number/')
 async def read_run_number():
-   #rcli = redis.Redis("vmeserver1-gp")
-   rcli = redis.Redis("localhost")
+   rcli = redis.Redis("vmeserver1-gp")
+   #rcli = redis.Redis("localhost")
    val_run_number = rcli.get("run_info:run_number")
    return val_run_number
 
 @router.get('/run_comment/')
 async def read_run_comment():
-   #rcli = redis.Redis("vmeserver1-gp")
-   rcli = redis.Redis("localhost")
+   rcli = redis.Redis("vmeserver1-gp")
+   #rcli = redis.Redis("localhost")
    val_run_comment = rcli.get("run_info:run_comment")
    return val_run_comment

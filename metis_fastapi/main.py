@@ -17,7 +17,8 @@ app.add_middleware(
 )
 
 aProxy = RedisProxy();
-aProxy.connect("localhost",6379,0);
+#aProxy.connect("localhost",6379,0);
+aProxy.connect("vmeserver1-gp",6379,0);
 
 @app.get("/")
 async def root():
@@ -40,6 +41,14 @@ async def read_item(key: str) :
 async def read_item(chnl: str, msg: str) :
     r = aProxy.instance()
     val = r.publish(chnl,msg);
+    if val == None :
+        val = ""
+    return {"message": val}
+
+@app.get("/incr/{key}")
+async def read_item(key: str) :
+    r = aProxy.instance()
+    val = r.incr(key);
     if val == None :
         val = ""
     return {"message": val}
