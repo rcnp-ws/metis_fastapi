@@ -4,9 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from modules.RedisProxy import RedisProxy
 from routers import ControlNestDAQ
+from routers import RouterSystemCommand
 
 app = FastAPI()
 app.include_router(ControlNestDAQ.router)
+app.include_router(RouterSystemCommand.router)
 
 app.add_middleware(
     CORSMiddleware,
