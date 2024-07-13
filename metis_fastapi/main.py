@@ -31,7 +31,7 @@ async def read_item(key: str, val: str) :
     r.set(key,val)
     return {"message": "set"}
 
-@app.get("/set/{key}/")
+@app.get("/set/{key}//")
 async def read_item(key: str) :
     r = aProxy.instance()
     r.set(key,"")
