@@ -29,12 +29,26 @@ async def root():
 async def read_item(key: str, val: str) :
     r = aProxy.instance()
     r.set(key,val)
-    return {"message": "hoge"}
+    return {"message": "set"}
+
+@app.get("/set/{key}/")
+async def read_item(key: str) :
+    r = aProxy.instance()
+    r.set(key,"")
+    return {"message": "clear"}
 
 @app.get("/get/{key}")
 async def read_item(key: str) :
     r = aProxy.instance()
     val = r.get(key);
+    if val == None :
+        val = ""
+    return {"message": val}
+
+@app.get("/incr/{key}")
+async def read_item(key: str) :
+    r = aProxy.instance()
+    val = r.incr(key);
     if val == None :
         val = ""
     return {"message": val}
@@ -47,13 +61,6 @@ async def read_item(chnl: str, msg: str) :
         val = ""
     return {"message": val}
 
-@app.get("/incr/{key}")
-async def read_item(key: str) :
-    r = aProxy.instance()
-    val = r.incr(key);
-    if val == None :
-        val = ""
-    return {"message": val}
 
 @app.get("/items/")
 async def read_item(skip: int = 0, limit: int = 10):
