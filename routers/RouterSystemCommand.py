@@ -17,3 +17,7 @@ async def exec(cmd: str):
    except:
       ret = "Error in subprocess.check_call(" + cmd + ")"
    return {"message": ret}
+
+@router.get('/exec//')
+async def exec():
+   return {"message": "No command"}
