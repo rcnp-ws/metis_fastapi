@@ -1,10 +1,16 @@
 import redis
 from fastapi import APIRouter
+from modules.RedisProxy import RedisProxy
 
 router = APIRouter(
    prefix="/nestdaq",
    tags=["nestdaq"]
 )
+
+aProxy = RedisProxy();
+#aProxy.connect("localhost",6379,0);
+aProxy.connect("vmeserver1-gp",6379,0)
+rcli = aProxy.instance()
 
 @router.get('/')
 async def root() : 
@@ -12,8 +18,6 @@ async def root() :
 
 @router.get('/status/')
 async def read_status():
-   rcli = redis.Redis("vmeserver1-gp")
-   #rcli = redis.Redis("localhost")
    key_updated = rcli.keys("daq_service:*:updatedTime")
    val_updated = rcli.mget(key_updated)
    key_state = rcli.keys("daq_service:*:fair-mq-state")
@@ -23,16 +27,17 @@ async def read_status():
    state = dict(zip(key_state,val_state))
    return state
 
-@router.get('/run_number/')
-async def read_run_number():
-   rcli = redis.Redis("vmeserver1-gp")
-   #rcli = redis.Redis("localhost")
-   val_run_number = rcli.get("run_info:run_number")
-   return val_run_number
+@router.get("/set_path/{key}/{val:path}")
+async def read_item(key: str, val:str) :
+   rcli.set(key,val)
+   return {"message": "set_path"}
 
-@router.get('/run_comment/')
+@router.get('/run_number')
+async def read_run_number():
+   val_run_number = rcli.get("run_info:run_number")
+   return {"message" : val_run_number}
+
+@router.get('/run_comment')
 async def read_run_comment():
-   rcli = redis.Redis("vmeserver1-gp")
-   #rcli = redis.Redis("localhost")
    val_run_comment = rcli.get("run_info:run_comment")
-   return val_run_comment
+   return {"message" : val_run_comment}
