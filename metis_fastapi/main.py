@@ -34,7 +34,7 @@ async def read_item(key: str, val: str) :
 @app.get("/get/{key}")
 async def read_item(key: str) :
     r = aProxy.instance()
-    val = r.get(key);
+    val = r.get(key)
     if val == None :
         val = ""
     return {"message": val}
@@ -42,7 +42,15 @@ async def read_item(key: str) :
 @app.get("/incr/{key}")
 async def read_item(key: str) :
     r = aProxy.instance()
-    val = r.incr(key);
+    val = r.incr(key)
+    if val == None :
+        val = ""
+    return {"message": val}
+
+@app.get("/expire/{key}/{time}")
+async def read_item(key: str, time: str) :
+    r = aProxy.instance()
+    val = r.expire(key, int(time))
     if val == None :
         val = ""
     return {"message": val}
@@ -50,7 +58,7 @@ async def read_item(key: str) :
 @app.get("/publish/{chnl}/{msg}")
 async def read_item(chnl: str, msg: str) :
     r = aProxy.instance()
-    val = r.publish(chnl,msg);
+    val = r.publish(chnl,msg)
     if val == None :
         val = ""
     return {"message": val}
