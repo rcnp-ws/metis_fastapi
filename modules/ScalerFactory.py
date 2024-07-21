@@ -30,6 +30,15 @@ class ScalerFactory:
         self._scalers[id].start()
         return self.message(0, "successfully added {}".format(id))
 
+    def suspend(self):
+        for id in self._scalers :
+            self._scalers[id].suspend()
+
+    def resume(self):
+        for id in self._scalers :
+            self._scalers[id].resume()
+            
+
     def removeScaler(self, id: str):
         self._scalers[id].stop()
         for infoKey in self._keys[id]:

@@ -12,6 +12,7 @@ class HulScaler(BaseScaler):
 
     def __init__(self, ip: str):
         super(HulScaler, self).__init__()
+        self._suspend = True
         self._types = {
             "0xc480": {"name": "StrHrTdc Base", "numCh": 32, "numBit": [32] * 32},
             "0x60c4": {"name": "StrLrTdc", "numCh": 129, "numBit": [32] * 129},
@@ -21,26 +22,26 @@ class HulScaler(BaseScaler):
             "0xc480": [
                 [
                     "read_mzn_scr {1} up {0} ",
-                    "od -An -j40 -v -t u4 -w4 {0}",
+                    "od -An -j72 -v -t u4 -w4 {0}",
                     "od -An -j4 -N4 -v -t u4 -w4 {0}",
                 ],
                 [
-                    "read_mzn_scr {1} down {0} ",
-                    "od -An -j40 -v -t u4 -w4 {0}",
+                    "read_mzn_scr {1} low {0} ",
+                    "od -An -j72 -v -t u4 -w4 {0}",
                     "od -An -j4 -N4 -v -t u4 -w4 {0}",
                 ],
             ],
             "0x60c4": [
                 [
                     "read_scr {1} {0} ",
-                    "od -An -j40 -v -t u4 -w4 {0}",
+                    "od -An -j72 -v -t u4 -w4 {0}",
                     "od -An -j4 -N4 -v -t u4 -w4 {0}",
                 ],
             ],
             "0xf000": [
                 [
                     "read_scr {1} {0} ",
-                    "od -An -j40 -v -t u4 -w4 {0}",
+                    "od -An -j72 -v -t u4 -w4 {0}",
                     "od -An -j4 -N4 -v -t u4 -w4 {0}",
                 ]
             ],
@@ -49,6 +50,12 @@ class HulScaler(BaseScaler):
         self._type = ""
         self.getVersion(ip)
         self._done = False
+
+    def suspend(self):
+        self._suspend = True
+
+    def resume(self):
+        self._suspend = False
 
     def stop(self):
         self._done = True
@@ -67,6 +74,10 @@ class HulScaler(BaseScaler):
         period = 1  # second
         checkStep = 0.1
         while (iLoop < nLoop) if nLoop > 0 else 1:
+            if (self._suspend) :
+                time.sleep(period)
+                print ("suspending")
+                continue
             if time.time() - lastModified < period:
                 time.sleep(checkStep)
                 continue
@@ -77,9 +88,9 @@ class HulScaler(BaseScaler):
                 break
 
     def getData(self):
-        print(self._type)
-        print(self._dataCmd[self._type])
-        print(self._data)
+#        print(self._type)
+#        print(self._dataCmd[self._type])
+#        print(self._data)
         self._lastData = self._data
         for idx, fmts in enumerate(self._dataCmd[self._type]):
             cmd = []
@@ -114,7 +125,7 @@ class HulScaler(BaseScaler):
             else:
                 print("bad")
 
-            diffValues = [np.nan] * self._info[sid]["numCh"]
+            diffValues = [0.] * self._info[sid]["numCh"]
             diffHbfn = 0
             diffTs = 0
             if len(self._lastData) > 0 and sid in self._lastData:
@@ -124,7 +135,7 @@ class HulScaler(BaseScaler):
                 for i, val in enumerate(lastValues):
                     diffValues[i] = values[i] - val
                     diffValues[i] += (
-                        2 ** self._info[sid]["numBit"] if diffValues[i] < 0 else 0
+                        2 ** self._info[sid]["numBit"][i] if diffValues[i] < 0 else 0
                     )
                 diffHbfn = hbfn - lastHbfn
                 diffHbfn += (2**24) if diffHbfn < 0 else 0

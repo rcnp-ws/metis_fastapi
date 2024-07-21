@@ -15,6 +15,14 @@ HulScaler.CommandPath = "ssh ata03 "
 async def root():
     pass
 
+@router.get("/suspend")
+async def scaler_suspend():
+    return factory.suspend()
+
+@router.get("/resume")
+async def scaler_resume():
+    return factory.resume()
+
 
 @router.get("/add/hul/{id}/")
 async def scaler_add(id: str):

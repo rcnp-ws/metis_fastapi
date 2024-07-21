@@ -36,9 +36,12 @@ class HulScalerTask(BaseEventTask):
     def getData(self):
         return self._scaler._data
 
-    def stop(self):
-        self._scaler.stop()
+    def suspend(self) :
+        self._scaler.suspend()
 
+    def resume(self) :
+        self._scaler.resume()
+        
     def task(self):
         self._scaler.loopGetData()
 

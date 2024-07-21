@@ -3,12 +3,13 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from modules.RedisProxy import RedisProxy
-from routers import ControlNestDAQ
 from routers import RouterSystemCommand
+from routers import ControlNestDAQ, RouterScaler
 
 app = FastAPI()
 app.include_router(ControlNestDAQ.router)
 app.include_router(RouterSystemCommand.router)
+app.include_router(RouterScaler.router)
 
 app.add_middleware(
     CORSMiddleware,
