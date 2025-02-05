@@ -6,7 +6,8 @@ authors = ["Shinsuke OTA <ota@rcnp.s.u-tokyo.ac.jp>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+# python = "^3.12"
+python = "^3.9"
 fastapi = "^0.111.0"
 uvicorn = "^0.30.1"
 redis = "^5.0.7"

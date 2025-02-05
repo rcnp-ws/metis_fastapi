@@ -69,28 +69,29 @@ class HulScaler(BaseScaler):
         return isValid
 
     def loopGetData(self, nLoop=0):
-        iLoop = 0
+        iLoop = -1
         lastModified = 0
         period = 1  # second
         checkStep = 0.1
-        while (iLoop < nLoop) if nLoop > 0 else 1:
+        while iLoop < nLoop:
             if (self._suspend) :
                 time.sleep(period)
-                print ("suspending")
                 continue
             if time.time() - lastModified < period:
                 time.sleep(checkStep)
                 continue
-            iLoop += 1
+            if nLoop > 0 :
+                iLoop += 1
             lastModified = time.time()
             self.getData()
-            if self._done:
-                break
+#            if self._done:
+#                break
+
 
     def getData(self):
-#        print(self._type)
-#        print(self._dataCmd[self._type])
-#        print(self._data)
+        print(self._type)
+        print(self._dataCmd[self._type])
+        print(self._data)
         self._lastData = self._data
         for idx, fmts in enumerate(self._dataCmd[self._type]):
             cmd = []
@@ -105,7 +106,7 @@ class HulScaler(BaseScaler):
             cmd = " && ".join(
                 cmd,
             )
-            cmd = HulScaler.CommandPath + "'" + cmd + "'"
+            cmd = HulScaler.CommandPath + "" + cmd + ""
             print(cmd)
             lines = (
                 (subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True))

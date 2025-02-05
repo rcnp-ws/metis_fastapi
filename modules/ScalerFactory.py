@@ -59,7 +59,7 @@ class ScalerFactory:
     def get_data(self, id: str = ""):
         if len(id):
             if id in self._scalers:
-                return self.message(0, "success", self._scalers[id].getData())
+                return self.message(0, "success for {}".format(id), self._scalers[id].getData())
             else:
                 return self.message(-1, "no such id {}".format(id))
         for scaler in self._scalers.values():

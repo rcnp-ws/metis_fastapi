@@ -8,7 +8,8 @@ from modules.HulScaler import HulScaler
 router = APIRouter(prefix="/scaler", tags=["scaler"])
 
 factory = ScalerFactory()
-HulScaler.CommandPath = "ssh ata03 "
+# HulScaler.CommandPath = "ssh ata03 "
+HulScaler.CommandPath = ""
 
 
 @router.get("/")
