@@ -41,14 +41,14 @@ class runinfo :
         pass
 
 
-    def getconfig(self, doUpdate = False) :
-        return self.getinfo("getconfig","",doUpdate)
+    def getconfig(self) :
+        return self.getinfo("getconfig","")
 
     def getevtnumber(self, doUpdate = False) :
-        return self.getinfo("getevtnumber","",doUpdate)
+        return self.getinfo("getevtnumber","")
 
-    def getinfo(self,cmd,arg="",doUpdate = False) :
-        self.execute(cmd,arg) if doUpdate else None
+    def getinfo(self,cmd,arg="") :
+        self.execute(cmd,arg)
         return self.getCache(cmd)
 
     def getCache(self,cmd) : 

@@ -10,8 +10,8 @@ import signal
 import time
 import datetime
 from multiprocessing import Value
-from json_dbstore import json_dbstore
-from wrap_babicmdjson import runinfo
+from modules.json_dbstore import json_dbstore
+from modules.wrap_babicmdjson import runinfo
 
 doMonitor = Value('i',1)
 lock = threading.Lock()

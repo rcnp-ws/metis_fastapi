@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "metis-fastapi"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
-authors = ["Shinsuke OTA <ota@rcnp.s.u-tokyo.ac.jp>"]
+authors = ["Shinsuke OTA <ota@rcnp.osaka-u.ac.jp>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

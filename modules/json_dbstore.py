@@ -1,7 +1,7 @@
 # @filename storeDAta.py
 # Create : 2020-10-07 12:25:12 JST (ota)
 # Last Modified : 2020-10-25 19:06:24 JST (ota)
-from dbstore import dbstore 
+from modules.dbstore import dbstore 
 import time
 import datetime
 import json
